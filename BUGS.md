@@ -1,0 +1,1 @@
+### New session should reuse the existing markdown - there's a separate button for new markdown
