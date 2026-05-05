@@ -1,7 +1,6 @@
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Navigate } from 'react-router-dom'
 import type { SessionState } from '../types'
 import type { SessionAction } from '../state/sessionReducer'
-import { useDeck } from '../state/DeckContext'
 
 interface Props {
   session: SessionState
@@ -24,12 +23,8 @@ const SCORE_MESSAGE = (pct: number) => {
 
 export function SummaryPage({ session, dispatch }: Props) {
   const navigate = useNavigate()
-  const { deck } = useDeck()
 
-  if (session.results.length === 0) {
-    navigate('/')
-    return null
-  }
+  if (session.results.length === 0) return <Navigate to="/" replace />
 
   const total = session.results.length
   const correct = session.results.filter(r => r.result === 'correct' || r.result === 'overridden').length
@@ -37,7 +32,6 @@ export function SummaryPage({ session, dispatch }: Props) {
   const wrong = session.results.filter(r => r.result === 'incorrect')
 
   function handleRetest() {
-    if (!deck) return
     const wrongCards = wrong.map(r => r.sessionCard)
     dispatch({ type: 'START_SESSION', cards: wrongCards })
     navigate('/session')

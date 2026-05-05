@@ -53,7 +53,10 @@ export function SessionPage({ session, dispatch }: Props) {
             result={lastResult.result}
             correctAnswer={current.answer}
             userAnswer={session.lastUserAnswer}
-            onOverride={() => dispatch({ type: 'OVERRIDE_CORRECT' })}
+            onOverride={() => {
+              dispatch({ type: 'OVERRIDE_CORRECT' })
+              dispatch({ type: 'ADVANCE' })
+            }}
             onNext={() => dispatch({ type: 'ADVANCE' })}
             isLast={isLast}
           />

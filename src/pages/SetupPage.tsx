@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Navigate } from 'react-router-dom'
 import { useDeck } from '../state/DeckContext'
 import { HierarchySelector } from '../components/HierarchySelector'
 import { DirectionToggle } from '../components/DirectionToggle'
@@ -17,13 +17,11 @@ export function SetupPage({ dispatch }: Props) {
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [direction, setDirection] = useState<Direction>('fr-to-en')
 
-  if (!deck) {
-    navigate('/')
-    return null
-  }
+  if (!deck) return <Navigate to="/" replace />
+  const loadedDeck = deck
 
   function handleStart() {
-    const cards = buildDeck(deck!, { selectedSections: selected }, direction)
+    const cards = buildDeck(loadedDeck, { selectedSections: selected }, direction)
     if (cards.length === 0) return
     dispatch({ type: 'START_SESSION', cards })
     navigate('/session')
@@ -31,7 +29,7 @@ export function SetupPage({ dispatch }: Props) {
 
   const totalSelected = selected.size === 0
     ? deck.allCards.length
-    : deck.themes.flatMap(t => t.units.flatMap(u =>
+    : loadedDeck.themes.flatMap(t => t.units.flatMap(u =>
         u.sections.filter(s => {
           const key = [t.name, u.name, s.name].join('|||')
           return selected.has(key)
@@ -64,7 +62,7 @@ export function SetupPage({ dispatch }: Props) {
               (leave all unchecked to study everything)
             </span>
           </h2>
-          <HierarchySelector deck={deck} selected={selected} onChange={setSelected} />
+          <HierarchySelector deck={loadedDeck} selected={selected} onChange={setSelected} />
         </div>
 
         <button
