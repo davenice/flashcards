@@ -30,13 +30,15 @@ export function buildDeck(
   deck: Deck,
   selection: SelectionState,
   direction: Direction,
+  limit?: number,
 ): SessionCard[] {
   const filtered: Card[] =
     selection.selectedSections.size === 0
       ? deck.allCards
       : deck.allCards.filter(c => selection.selectedSections.has(sectionKey(c.sectionPath)))
 
-  return shuffle(filtered.map(c => cardToSessionCard(c, direction)))
+  const shuffled = shuffle(filtered.map(c => cardToSessionCard(c, direction)))
+  return limit != null && limit < shuffled.length ? shuffled.slice(0, limit) : shuffled
 }
 
 export { sectionKey }

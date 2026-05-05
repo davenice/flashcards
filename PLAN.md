@@ -191,7 +191,6 @@ GitHub repo Settings → Pages → Source: "GitHub Actions"
 
 ## Future Ideas (not in scope now)
 
-- **Allow you to choose how many questions in the quiz** - choose a number of questions and we pick at random from the flashcards.
 - **End test early** - an option to end the test, show you your percentage score and give the opportunity to retest any you got wrong.
 - **Progress persistence** — track results across sessions, first via `localStorage`, later optionally synced to an online store (e.g. a small backend or GitHub Gist)
 - **Markdown file storage** — save uploaded/pasted decks in `localStorage` so the user doesn't have to re-upload each session; manage multiple saved decks
