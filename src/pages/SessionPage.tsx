@@ -37,7 +37,18 @@ export function SessionPage({ session, dispatch }: Props) {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-start p-4 pt-8">
       <div className="w-full max-w-lg space-y-6">
-        <ProgressBar current={session.currentIndex} total={session.cards.length} />
+        <div className="flex items-center gap-4">
+          <div className="flex-1">
+            <ProgressBar current={session.currentIndex} total={session.cards.length} />
+          </div>
+          <button
+            onClick={() => dispatch({ type: 'END_EARLY' })}
+            className="shrink-0 text-sm text-slate-400 hover:text-slate-600 transition-colors"
+            aria-label="End test early"
+          >
+            End test
+          </button>
+        </div>
 
         <FlashCard prompt={current.prompt} direction={directionLabel} />
 

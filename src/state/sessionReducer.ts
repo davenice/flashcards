@@ -6,6 +6,7 @@ export type SessionAction =
   | { type: 'SUBMIT_ANSWER'; userAnswer: string }
   | { type: 'OVERRIDE_CORRECT' }
   | { type: 'ADVANCE' }
+  | { type: 'END_EARLY' }
   | { type: 'RESET' }
 
 export const initialSessionState: SessionState = {
@@ -56,6 +57,9 @@ export function sessionReducer(state: SessionState, action: SessionAction): Sess
       }
       return { ...state, currentIndex: nextIndex, phase: 'answering', lastUserAnswer: '' }
     }
+
+    case 'END_EARLY':
+      return { ...state, phase: 'complete' }
 
     case 'RESET':
       return initialSessionState

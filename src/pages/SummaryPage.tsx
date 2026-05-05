@@ -26,9 +26,12 @@ export function SummaryPage({ session, dispatch }: Props) {
 
   if (session.results.length === 0) return <Navigate to="/" replace />
 
-  const total = session.results.length
+  const answeredCount = session.results.length
+  const totalCards = session.cards.length
+  const endedEarly = answeredCount < totalCards
+
   const correct = session.results.filter(r => r.result === 'correct' || r.result === 'overridden').length
-  const pct = Math.round((correct / total) * 100)
+  const pct = Math.round((correct / answeredCount) * 100)
   const wrong = session.results.filter(r => r.result === 'incorrect')
 
   function handleRetest() {
@@ -55,8 +58,13 @@ export function SummaryPage({ session, dispatch }: Props) {
           <p className="text-6xl mb-3" role="img" aria-label={SCORE_MESSAGE(pct)}>
             {SCORE_EMOJI(pct)}
           </p>
-          <p className="text-4xl font-bold text-slate-800 mb-1">{correct} / {total}</p>
+          <p className="text-4xl font-bold text-slate-800 mb-1">{correct} / {answeredCount}</p>
           <p className="text-slate-500">{pct}% — {SCORE_MESSAGE(pct)}</p>
+          {endedEarly && (
+            <p className="text-sm text-slate-400 mt-2">
+              Ended after {answeredCount} of {totalCards} cards
+            </p>
+          )}
         </div>
 
         {/* Wrong answers */}
