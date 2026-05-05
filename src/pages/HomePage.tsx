@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { parseMarkdown } from '../parser/parseMarkdown'
 import { useDeck } from '../state/DeckContext'
+import type { SavedDeck } from '../types'
 
 const FORMAT_EXAMPLE = `# Theme name
 
@@ -17,44 +17,100 @@ const FORMAT_EXAMPLE = `# Theme name
 export function HomePage() {
   const [error, setError] = useState<string | null>(null)
   const [showFormat, setShowFormat] = useState(false)
-  const { setDeck } = useDeck()
+  const { savedDecks, addDeck, selectDeck, removeDeck } = useDeck()
   const navigate = useNavigate()
   const fileRef = useRef<HTMLInputElement>(null)
-
-  function handleParse(markdown: string) {
-    const result = parseMarkdown(markdown)
-    if (!result.ok) {
-      setError(result.error)
-      return
-    }
-    setDeck(result.deck)
-    navigate('/setup')
-  }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     setError(null)
     const file = e.target.files?.[0]
     if (!file) return
     const reader = new FileReader()
-    reader.onload = ev => handleParse(ev.target?.result as string)
+    reader.onload = ev => {
+      const result = addDeck(ev.target?.result as string, file.name)
+      if (!result.ok) {
+        setError(result.error)
+      } else {
+        navigate('/setup')
+      }
+    }
     reader.readAsText(file)
-    // Reset so the same file can be re-selected if needed
     e.target.value = ''
   }
+
+  function handleStudy(saved: SavedDeck) {
+    const ok = selectDeck(saved)
+    if (ok) {
+      navigate('/setup')
+    } else {
+      setError(`Failed to load "${saved.label}" — try removing and re-uploading it.`)
+    }
+  }
+
+  function handleRemove(saved: SavedDeck) {
+    if (window.confirm(`Remove "${saved.label}"? You'll need to upload the file again to use it.`)) {
+      removeDeck(saved.id)
+    }
+  }
+
+  const hasSavedDecks = savedDecks.length > 0
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-sm">
         <h1 className="text-3xl font-bold text-slate-800 mb-2 text-center">Flashcards</h1>
-        <p className="text-slate-500 text-center mb-8">Upload a markdown file to begin.</p>
 
-        <button
-          type="button"
-          onClick={() => fileRef.current?.click()}
-          className="w-full py-4 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition-colors text-lg min-h-[56px]"
-        >
-          Choose file…
-        </button>
+        {hasSavedDecks ? (
+          <>
+            <p className="text-slate-500 text-center mb-6">Choose a deck to study.</p>
+
+            <ul className="space-y-2 mb-6">
+              {savedDecks.map(saved => (
+                <li
+                  key={saved.id}
+                  className="bg-white rounded-xl border border-slate-200 px-4 py-3 flex items-center gap-3"
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-slate-800 truncate">{saved.label}</p>
+                    <p className="text-xs text-slate-400">{saved.cardCount} card{saved.cardCount !== 1 ? 's' : ''}</p>
+                  </div>
+                  <button
+                    onClick={() => handleStudy(saved)}
+                    className="shrink-0 px-4 py-1.5 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 transition-colors"
+                  >
+                    Study
+                  </button>
+                  <button
+                    onClick={() => handleRemove(saved)}
+                    className="shrink-0 text-slate-300 hover:text-red-400 transition-colors text-lg leading-none"
+                    aria-label={`Remove ${saved.label}`}
+                  >
+                    ×
+                  </button>
+                </li>
+              ))}
+            </ul>
+
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              className="w-full py-3 bg-white text-slate-700 font-semibold rounded-xl border border-slate-300 hover:bg-slate-50 transition-colors"
+            >
+              Upload another file…
+            </button>
+          </>
+        ) : (
+          <>
+            <p className="text-slate-500 text-center mb-8">Upload a markdown file to begin.</p>
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              className="w-full py-4 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition-colors text-lg min-h-[56px]"
+            >
+              Choose file…
+            </button>
+          </>
+        )}
 
         <input
           ref={fileRef}

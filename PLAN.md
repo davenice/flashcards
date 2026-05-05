@@ -1,7 +1,7 @@
 # Flashcard Webapp — Implementation Plan
 
 ## Context
-Building a client-side-only flashcard webapp for foreign language learning (French ↔ English). Deployed to GitHub Pages (static files, no server). User supplies a structured markdown file, picks a subset to study, then works through cards with correctness checking and a final summary with retest option.
+Building a client-side-only flashcard webapp for foreign language learning (French ↔ English). Deployed to GitHub Pages (static files, no server). User uploads a structured markdown file (saved to `localStorage`), picks a deck and subset to study, then works through cards with correctness checking and a final summary with retest option.
 
 ---
 
@@ -14,6 +14,7 @@ Building a client-side-only flashcard webapp for foreign language learning (Fren
 | Styling | Tailwind CSS v4 | Mobile-first utilities; single CSS import |
 | Markdown parsing | Custom ~60-line parser | Exact format → typed output; no bundle weight |
 | State | `useReducer` + React Context | Right-sized; no external library needed |
+| Persistence | `localStorage` | Decks survive page refresh; no server required |
 | Deployment | GitHub Actions + `deploy-pages` action | Automatic on push; no PAT required |
 
 ---
@@ -50,10 +51,10 @@ Rules:
 
 ## User Flow
 
-1. **Home** — upload a `.md` file → parsed in-browser → navigate to Setup
-2. **Setup** — pick theme/unit/section via checkbox tree; choose direction (FR→EN or EN→FR)
-3. **Session** — show prompt word → user types answer → check correctness → reveal result + correct answer if wrong → "Actually I was right" override button → advance
-4. **Summary** — score (`n / total`), list of wrong answers, "Retest wrong answers" button
+1. **Home** — shows saved deck library; upload a `.md` file to add a deck → parsed and persisted → navigate to Setup
+2. **Setup** — pick theme/unit/section via checkbox tree; choose direction (FR→EN or EN→FR); choose how many questions
+3. **Session** — show prompt word → user types answer → check correctness → reveal result + correct answer if wrong → "Actually I was right" override button → advance; "End test" button available throughout
+4. **Summary** — score (`n / total`; notes if ended early), list of wrong answers, "Retest wrong answers" button
 
 ---
 
@@ -68,14 +69,14 @@ src/
 │   ├── parseMarkdown.ts       # Single-pass line scanner; returns discriminated union
 │   └── parseMarkdown.test.ts
 ├── state/
-│   ├── sessionReducer.ts      # Actions: START_SESSION, SUBMIT_ANSWER, OVERRIDE_CORRECT, ADVANCE, RESET
+│   ├── sessionReducer.ts      # Actions: START_SESSION, SUBMIT_ANSWER, OVERRIDE_CORRECT, ADVANCE, END_EARLY, RESET
 │   ├── sessionReducer.test.ts
-│   └── DeckContext.tsx        # Deck stored at App level, provided via Context
+│   └── DeckContext.tsx        # savedDecks + active deck; addDeck / selectDeck / removeDeck
 ├── pages/
-│   ├── HomePage.tsx           # File upload + saved deck library
-│   ├── SetupPage.tsx          # HierarchySelector + DirectionToggle + Start button
-│   ├── SessionPage.tsx        # FlashCard + AnswerInput + FeedbackPanel + ProgressBar
-│   └── SummaryPage.tsx        # Score + wrong answers list + retest
+│   ├── HomePage.tsx           # Saved deck library + file upload
+│   ├── SetupPage.tsx          # HierarchySelector + DirectionToggle + question count + Start button
+│   ├── SessionPage.tsx        # FlashCard + AnswerInput + FeedbackPanel + ProgressBar + End test
+│   └── SummaryPage.tsx        # Score + early-end note + wrong answers list + retest
 ├── components/
 │   ├── FlashCard.tsx          # Large centred prompt display
 │   ├── AnswerInput.tsx        # Controlled input + submit; auto-focuses on mount
@@ -85,7 +86,8 @@ src/
 │   └── DirectionToggle.tsx    # FR→EN / EN→FR toggle
 └── utils/
     ├── normalise.ts           # Trim, lowercase, collapse spaces (extension point for fuzzy matching)
-    └── buildDeck.ts           # Filter by selection + direction → shuffled SessionCard[]
+    ├── buildDeck.ts           # Filter by selection + direction + optional limit → shuffled SessionCard[]
+    └── deckStorage.ts         # djb2 hash, localStorage load/persist for SavedDeck[]
 .github/workflows/deploy.yml
 vite.config.ts                 # base: '/flashcards/' — must match repo name on GitHub Pages
 ```
@@ -101,6 +103,9 @@ interface Unit { name: string; sections: Section[]; }
 interface Theme { name: string; units: Unit[]; }
 interface Deck { themes: Theme[]; allCards: Card[]; }
 
+interface SavedDeck { id: string; label: string; raw: string; savedAt: number; cardCount: number; }
+// id = djb2 hash of raw content; label = first # heading or filename; raw = original markdown
+
 type Direction = 'fr-to-en' | 'en-to-fr';
 interface SessionCard { card: Card; prompt: string; answer: string; }
 type AnswerResult = 'correct' | 'incorrect' | 'overridden';
@@ -115,14 +120,25 @@ interface SessionState { cards: SessionCard[]; currentIndex: number; phase: Sess
 ## Session Reducer Transitions
 
 ```
-START_SESSION   → cards[], index=0, phase='answering'
-SUBMIT_ANSWER   → normalise+compare, record result, phase='revealing'
+START_SESSION    → cards[], index=0, phase='answering'
+SUBMIT_ANSWER    → normalise+compare, record result, phase='revealing'
 OVERRIDE_CORRECT → mutate last result to 'overridden', stay in 'revealing'
-ADVANCE         → index++; if index >= length → phase='complete'; else phase='answering'
-RESET           → initial empty state
+ADVANCE          → index++; if index >= length → phase='complete'; else phase='answering'
+END_EARLY        → phase='complete' (results contains only answered cards)
+RESET            → initial empty state
 ```
 
 Correctness: `normalise(userAnswer) === normalise(card.answer)` where `normalise` = trim + lowercase + collapse spaces.
+
+---
+
+## Deck Persistence
+
+- Decks stored in `localStorage` under key `flashcards:decks` as a JSON array of `SavedDeck`.
+- Content is hashed (djb2) on upload; duplicate files are detected and silently reuse the existing entry.
+- Label is extracted from the first `# heading` in the file; falls back to the filename without extension.
+- Active deck is re-parsed from `SavedDeck.raw` on selection (parsed `Deck` is not stored).
+- `QuotaExceededError` is caught in `persistDecks` and surfaced as a user-visible error message.
 
 ---
 
@@ -186,21 +202,23 @@ GitHub repo Settings → Pages → Source: "GitHub Actions"
 8. SummaryPage: score display + wrong answers + retest
 9. Polish: keyboard accessibility, mobile tap targets (44px min), ARIA labels
 10. Deploy: GitHub Actions workflow, enable Pages, verify on mobile device
+11. Question count: optional limit in `buildDeck`; stepper UI in SetupPage
+12. End test early: `END_EARLY` reducer action; "End test" button in SessionPage; early-end note in SummaryPage
+13. Deck persistence: `SavedDeck` type + `deckStorage.ts` + expanded `DeckContext`; HomePage becomes deck library
 
 ---
 
 ## Future Ideas (not in scope now)
 
-- **PWA support** - allow the app to be installed and state to be kept between sessions
+- **PWA support** — service worker + web app manifest; makes the app installable and usable offline. Pairs well with deck persistence already in place.
 - **Progress persistence** — track results across sessions, first via `localStorage`, later optionally synced to an online store (e.g. a small backend or GitHub Gist)
-- **Markdown file storage** — save uploaded decks in `localStorage` so the user doesn't have to re-upload each session; manage multiple saved decks
 - **Celebratory feedback** — fun emoji or illustration on the summary screen based on score (à la Slack's "you're all caught up, here's a banana") — e.g. 100% gets a trophy, 80%+ gets a star, lower scores get an encouraging nudge
 - **Fuzzy answer matching** — the `normalise.ts` utility is already the extension point:
   - `word1 / word2` in an answer → accept either
   - `word1, word2` in an answer → accept any one of the options
   - Strip leading articles (`le`, `la`, `les`, `un`, `une`) optionally
   - Ignore punctuation differences
-- **Accent buttons** - buttons to allow you to add accents to letters
+- **Accent buttons** — buttons to insert accented characters into the answer input
 
 ---
 
@@ -213,5 +231,10 @@ GitHub repo Settings → Pages → Source: "GitHub Actions"
 - Full session: upload a `.md` file → pick section → run session → reach summary
 - Override: marking wrong answer as "actually correct" updates the score
 - Retest: only wrong-answer cards appear in retest session
+- Deck persistence: uploaded deck survives page refresh; appears in library on home page
+- Duplicate detection: uploading the same file twice does not create two library entries
+- Remove deck: deck disappears from library and is gone after refresh
+- Question count: setting a limit produces a session with exactly that many cards
+- End early: "End test" navigates to summary; score reflects only answered cards; "Ended after X of Y" note shown
 - Mobile: all tap targets reachable; keyboard doesn't obscure answer input
 - GitHub Actions: workflow green, deployed URL works

@@ -24,6 +24,14 @@ export interface Deck {
   allCards: Card[]
 }
 
+export interface SavedDeck {
+  id: string        // djb2 hash of raw content — used for dedup
+  label: string     // first # heading, or filename without extension
+  raw: string       // original markdown — re-parsed on select
+  savedAt: number   // Date.now()
+  cardCount: number
+}
+
 export type Direction = 'fr-to-en' | 'en-to-fr'
 
 export interface SessionCard {
