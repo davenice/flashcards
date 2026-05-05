@@ -6,6 +6,7 @@ import { HomePage } from './pages/HomePage'
 import { SetupPage } from './pages/SetupPage'
 import { SessionPage } from './pages/SessionPage'
 import { SummaryPage } from './pages/SummaryPage'
+import { StatsPage } from './pages/StatsPage'
 
 export default function App() {
   const [session, dispatch] = useReducer(sessionReducer, initialSessionState)
@@ -18,6 +19,7 @@ export default function App() {
           <Route path="/setup" element={<SetupPage dispatch={dispatch} />} />
           <Route path="/session" element={<SessionPage session={session} dispatch={dispatch} />} />
           <Route path="/summary" element={<SummaryPage session={session} dispatch={dispatch} />} />
+          <Route path="/stats" element={<StatsPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </HashRouter>

@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { useDeck } from '../state/DeckContext'
+import { hasAnyStats } from '../utils/resultStorage'
 import type { SavedDeck } from '../types'
 
 const FORMAT_EXAMPLE = `# Theme name
@@ -125,6 +126,14 @@ export function HomePage() {
         {error && (
           <p role="alert" className="mt-4 text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg p-3">
             {error}
+          </p>
+        )}
+
+        {hasAnyStats() && (
+          <p className="mt-4 text-center">
+            <Link to="/stats" className="text-sm text-slate-400 hover:text-indigo-600 transition-colors">
+              View stats →
+            </Link>
           </p>
         )}
 

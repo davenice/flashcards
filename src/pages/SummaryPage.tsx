@@ -1,6 +1,8 @@
+import { useEffect } from 'react'
 import { useNavigate, Navigate } from 'react-router-dom'
 import type { SessionState } from '../types'
 import type { SessionAction } from '../state/sessionReducer'
+import { mergeSessionResults } from '../utils/resultStorage'
 
 interface Props {
   session: SessionState
@@ -23,6 +25,10 @@ const SCORE_MESSAGE = (pct: number) => {
 
 export function SummaryPage({ session, dispatch }: Props) {
   const navigate = useNavigate()
+
+  useEffect(() => {
+    if (session.results.length > 0) mergeSessionResults(session.results)
+  }, [])
 
   if (session.results.length === 0) return <Navigate to="/" replace />
 

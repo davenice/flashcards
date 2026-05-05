@@ -32,6 +32,14 @@ export interface SavedDeck {
   cardCount: number
 }
 
+export interface CardStats {
+  french: string
+  english: string
+  correct: number   // cumulative correct + overridden
+  incorrect: number // cumulative incorrect
+  lastSeen: number  // Date.now() of most recent session
+}
+
 export type Direction = 'fr-to-en' | 'en-to-fr'
 
 export interface SessionCard {

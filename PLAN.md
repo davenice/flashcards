@@ -51,10 +51,11 @@ Rules:
 
 ## User Flow
 
-1. **Home** — shows saved deck library; upload a `.md` file to add a deck → parsed and persisted → navigate to Setup
+1. **Home** — shows saved deck library; upload a `.md` file to add a deck → parsed and persisted → navigate to Setup; "View stats →" link appears once any session history exists
 2. **Setup** — pick theme/unit/section via checkbox tree; choose direction (FR→EN or EN→FR); choose how many questions
 3. **Session** — show prompt word → user types answer → check correctness → reveal result + correct answer if wrong → "Actually I was right" override button → advance; "End test" button available throughout
-4. **Summary** — score (`n / total`; notes if ended early), list of wrong answers, "Retest wrong answers" button
+4. **Summary** — score (`n / total`; notes if ended early), list of wrong answers, "Retest wrong answers" button; results persisted to localStorage on mount
+5. **Stats** — all-time correct/incorrect counts per card, sorted by most missed; total cards seen + attempts summary
 
 ---
 
@@ -73,10 +74,11 @@ src/
 │   ├── sessionReducer.test.ts
 │   └── DeckContext.tsx        # savedDecks + active deck; addDeck / selectDeck / removeDeck
 ├── pages/
-│   ├── HomePage.tsx           # Saved deck library + file upload
+│   ├── HomePage.tsx           # Saved deck library + file upload + stats link
 │   ├── SetupPage.tsx          # HierarchySelector + DirectionToggle + question count + Start button
 │   ├── SessionPage.tsx        # FlashCard + AnswerInput + FeedbackPanel + ProgressBar + End test
-│   └── SummaryPage.tsx        # Score + early-end note + wrong answers list + retest
+│   ├── SummaryPage.tsx        # Score + early-end note + wrong answers list + retest; persists results
+│   └── StatsPage.tsx          # All-time per-card history; sorted by most missed
 ├── components/
 │   ├── FlashCard.tsx          # Large centred prompt display
 │   ├── AnswerInput.tsx        # Controlled input + submit; auto-focuses on mount
@@ -87,7 +89,8 @@ src/
 └── utils/
     ├── normalise.ts           # Trim, lowercase, collapse spaces (extension point for fuzzy matching)
     ├── buildDeck.ts           # Filter by selection + direction + optional limit → shuffled SessionCard[]
-    └── deckStorage.ts         # djb2 hash, localStorage load/persist for SavedDeck[]
+    ├── deckStorage.ts         # djb2 hash, localStorage load/persist for SavedDeck[]
+    └── resultStorage.ts       # localStorage load/merge/check for CardStats[]; key: flashcards:results
 .github/workflows/deploy.yml
 vite.config.ts                 # base: '/flashcards/' — must match repo name on GitHub Pages
 ```
@@ -105,6 +108,9 @@ interface Deck { themes: Theme[]; allCards: Card[]; }
 
 interface SavedDeck { id: string; label: string; raw: string; savedAt: number; cardCount: number; }
 // id = djb2 hash of raw content; label = first # heading or filename; raw = original markdown
+
+interface CardStats { french: string; english: string; correct: number; incorrect: number; lastSeen: number; }
+// key in storage: `${french}|||${english}` — direction-agnostic; overridden counts as correct
 
 type Direction = 'fr-to-en' | 'en-to-fr';
 interface SessionCard { card: Card; prompt: string; answer: string; }
@@ -162,6 +168,7 @@ Returns `{ ok: true, deck: Deck } | { ok: false, error: string }` — discrimina
 /setup     → SetupPage   (redirects to / if no deck)
 /session   → SessionPage (redirects to /setup if no session)
 /summary   → SummaryPage (redirects to / if no results)
+/stats     → StatsPage
 *          → redirect to /
 ```
 
@@ -205,13 +212,14 @@ GitHub repo Settings → Pages → Source: "GitHub Actions"
 11. Question count: optional limit in `buildDeck`; stepper UI in SetupPage
 12. End test early: `END_EARLY` reducer action; "End test" button in SessionPage; early-end note in SummaryPage
 13. Deck persistence: `SavedDeck` type + `deckStorage.ts` + expanded `DeckContext`; HomePage becomes deck library
+14. Results history: `CardStats` type + `resultStorage.ts`; SummaryPage persists on mount; StatsPage at `/stats`
 
 ---
 
 ## Future Ideas (not in scope now)
 
-- **PWA support** — service worker + web app manifest; makes the app installable and usable offline. Pairs well with deck persistence already in place.
-- **Progress persistence** — track results across sessions, first via `localStorage`, later optionally synced to an online store (e.g. a small backend or GitHub Gist)
+- **PWA support** — service worker + web app manifest; makes the app installable and usable offline. Pairs well with deck and results persistence already in place.
+- **Results sync** — export/import results history (e.g. via GitHub Gist or JSON file download) to share across devices
 - **Celebratory feedback** — fun emoji or illustration on the summary screen based on score (à la Slack's "you're all caught up, here's a banana") — e.g. 100% gets a trophy, 80%+ gets a star, lower scores get an encouraging nudge
 - **Fuzzy answer matching** — the `normalise.ts` utility is already the extension point:
   - `word1 / word2` in an answer → accept either
@@ -236,5 +244,8 @@ GitHub repo Settings → Pages → Source: "GitHub Actions"
 - Remove deck: deck disappears from library and is gone after refresh
 - Question count: setting a limit produces a session with exactly that many cards
 - End early: "End test" navigates to summary; score reflects only answered cards; "Ended after X of Y" note shown
+- Results history: complete a session → summary → home → "View stats →" link visible
+- Stats page: cards listed sorted by most missed; counts accumulate across sessions
+- Stats page: empty state shown before first session; back link returns to home
 - Mobile: all tap targets reachable; keyboard doesn't obscure answer input
 - GitHub Actions: workflow green, deployed URL works
