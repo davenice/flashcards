@@ -43,7 +43,6 @@ export function SummaryPage({ session, dispatch }: Props) {
   }
 
   function handleNewSession() {
-    dispatch({ type: 'RESET' })
     navigate('/setup')
   }
 
