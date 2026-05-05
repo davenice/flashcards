@@ -46,7 +46,7 @@ export function HomePage() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <textarea
             className="w-full h-48 p-3 border border-slate-300 rounded-lg font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
-            placeholder={`# Theme\n## Unit\n### Section\nFrench | English\n--- | ---\nbonjour | hello`}
+            placeholder={`# Theme\n\n## Unit\n\n### Section\n| French | English |\n|--------|----------|\n| bonjour | hello |\n| merci | thank you |`}
             value={text}
             onChange={e => { setText(e.target.value); setError(null) }}
             aria-label="Paste flashcard markdown"
@@ -87,10 +87,10 @@ export function HomePage() {
         </form>
 
         <p className="mt-6 text-xs text-slate-400 text-center">
-          Format: <code className="bg-slate-100 px-1 rounded"># Theme</code> &nbsp;
+          <code className="bg-slate-100 px-1 rounded"># Theme</code> &nbsp;
           <code className="bg-slate-100 px-1 rounded">## Unit</code> &nbsp;
           <code className="bg-slate-100 px-1 rounded">### Section</code> &nbsp;
-          then <code className="bg-slate-100 px-1 rounded">French | English</code> rows
+          then a <code className="bg-slate-100 px-1 rounded">| French | English |</code> table
         </p>
       </div>
     </div>
