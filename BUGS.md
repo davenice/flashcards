@@ -1,0 +1,2 @@
+### Clicking "I was right" should advance you straight to the next word, not show you "correct"
+### Don't allow users to paste in markdown so obviously, just allow the file upload. Have a hideable section that shows the file format.
