@@ -63,6 +63,23 @@ describe('sessionReducer', () => {
     expect(state.phase).toBe('complete')
   })
 
+  it('END_EARLY during answering sets phase to complete without adding a result', () => {
+    let state = sessionReducer(initialSessionState, { type: 'START_SESSION', cards })
+    state = sessionReducer(state, { type: 'END_EARLY' })
+    expect(state.phase).toBe('complete')
+    expect(state.results).toHaveLength(0)
+    expect(state.currentIndex).toBe(0)
+  })
+
+  it('END_EARLY during revealing preserves existing results', () => {
+    let state = sessionReducer(initialSessionState, { type: 'START_SESSION', cards })
+    state = sessionReducer(state, { type: 'SUBMIT_ANSWER', userAnswer: 'hello' })
+    state = sessionReducer(state, { type: 'END_EARLY' })
+    expect(state.phase).toBe('complete')
+    expect(state.results).toHaveLength(1)
+    expect(state.results[0].result).toBe('correct')
+  })
+
   it('RESET returns to initial state', () => {
     let state = sessionReducer(initialSessionState, { type: 'START_SESSION', cards })
     state = sessionReducer(state, { type: 'SUBMIT_ANSWER', userAnswer: 'hello' })
