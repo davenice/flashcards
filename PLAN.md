@@ -50,7 +50,7 @@ Rules:
 
 ## User Flow
 
-1. **Home** — paste or upload a `.md` file → parsed in-browser → navigate to Setup
+1. **Home** — upload a `.md` file → parsed in-browser → navigate to Setup
 2. **Setup** — pick theme/unit/section via checkbox tree; choose direction (FR→EN or EN→FR)
 3. **Session** — show prompt word → user types answer → check correctness → reveal result + correct answer if wrong → "Actually I was right" override button → advance
 4. **Summary** — score (`n / total`), list of wrong answers, "Retest wrong answers" button
@@ -72,7 +72,7 @@ src/
 │   ├── sessionReducer.test.ts
 │   └── DeckContext.tsx        # Deck stored at App level, provided via Context
 ├── pages/
-│   ├── HomePage.tsx           # Textarea paste + file upload
+│   ├── HomePage.tsx           # File upload + saved deck library
 │   ├── SetupPage.tsx          # HierarchySelector + DirectionToggle + Start button
 │   ├── SessionPage.tsx        # FlashCard + AnswerInput + FeedbackPanel + ProgressBar
 │   └── SummaryPage.tsx        # Score + wrong answers list + retest
@@ -180,7 +180,7 @@ GitHub repo Settings → Pages → Source: "GitHub Actions"
 2. Types + Parser: `src/types.ts`, `src/parser/parseMarkdown.ts`, parser tests
 3. Routing skeleton: `App.tsx` with `HashRouter`, stub pages, `DeckContext`
 4. Session reducer: full action union + tests
-5. HomePage: paste + upload → parse → navigate to /setup
+5. HomePage: file upload → parse → navigate to /setup
 6. SetupPage: checkbox tree + direction toggle + `buildDeck` utility
 7. SessionPage: full card flow with all components
 8. SummaryPage: score display + wrong answers + retest
@@ -191,14 +191,16 @@ GitHub repo Settings → Pages → Source: "GitHub Actions"
 
 ## Future Ideas (not in scope now)
 
+- **PWA support** - allow the app to be installed and state to be kept between sessions
 - **Progress persistence** — track results across sessions, first via `localStorage`, later optionally synced to an online store (e.g. a small backend or GitHub Gist)
-- **Markdown file storage** — save uploaded/pasted decks in `localStorage` so the user doesn't have to re-upload each session; manage multiple saved decks
+- **Markdown file storage** — save uploaded decks in `localStorage` so the user doesn't have to re-upload each session; manage multiple saved decks
 - **Celebratory feedback** — fun emoji or illustration on the summary screen based on score (à la Slack's "you're all caught up, here's a banana") — e.g. 100% gets a trophy, 80%+ gets a star, lower scores get an encouraging nudge
 - **Fuzzy answer matching** — the `normalise.ts` utility is already the extension point:
   - `word1 / word2` in an answer → accept either
   - `word1, word2` in an answer → accept any one of the options
   - Strip leading articles (`le`, `la`, `les`, `un`, `une`) optionally
   - Ignore punctuation differences
+- **Accent buttons** - buttons to allow you to add accents to letters
 
 ---
 
@@ -208,8 +210,7 @@ GitHub repo Settings → Pages → Source: "GitHub Actions"
 - `npm run preview` — app serves from `localhost:4173/flashcards/` (matching base path)
 - Hash routing: refreshing `/#/setup` does not 404
 - Parser tests pass: `npx vitest run`
-- Full session: paste example markdown → pick section → run session → reach summary
-- File upload: `.md` file upload works same as paste
+- Full session: upload a `.md` file → pick section → run session → reach summary
 - Override: marking wrong answer as "actually correct" updates the score
 - Retest: only wrong-answer cards appear in retest session
 - Mobile: all tap targets reachable; keyboard doesn't obscure answer input
