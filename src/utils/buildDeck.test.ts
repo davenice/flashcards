@@ -38,6 +38,14 @@ describe('buildDeck — selection', () => {
     const emptySection = { selectedSections: new Set(['X|||Y|||Z']) }
     expect(buildDeck(deck, emptySection, 'fr-to-en')).toHaveLength(0)
   })
+
+  it('returns cards from multiple selected sections', () => {
+    const both = { selectedSections: new Set([sectionKey(s1), sectionKey(s2)]) }
+    const result = buildDeck(deck, both, 'fr-to-en')
+    expect(result).toHaveLength(3)
+    const prompts = result.map(c => c.prompt).sort()
+    expect(prompts).toEqual(['au revoir', 'bonjour', 'merci'])
+  })
 })
 
 describe('buildDeck — direction', () => {

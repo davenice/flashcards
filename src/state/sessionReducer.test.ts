@@ -19,6 +19,15 @@ describe('sessionReducer', () => {
     expect(state.results).toHaveLength(0)
   })
 
+  it('START_SESSION clears results from a previous session', () => {
+    let state = sessionReducer(initialSessionState, { type: 'START_SESSION', cards })
+    state = sessionReducer(state, { type: 'SUBMIT_ANSWER', userAnswer: 'hello' })
+    state = sessionReducer(state, { type: 'START_SESSION', cards })
+    expect(state.results).toHaveLength(0)
+    expect(state.currentIndex).toBe(0)
+    expect(state.phase).toBe('answering')
+  })
+
   it('SUBMIT_ANSWER marks correct answer', () => {
     let state = sessionReducer(initialSessionState, { type: 'START_SESSION', cards })
     state = sessionReducer(state, { type: 'SUBMIT_ANSWER', userAnswer: 'hello' })
@@ -30,6 +39,24 @@ describe('sessionReducer', () => {
     let state = sessionReducer(initialSessionState, { type: 'START_SESSION', cards })
     state = sessionReducer(state, { type: 'SUBMIT_ANSWER', userAnswer: 'Hello' })
     expect(state.results[0].result).toBe('correct')
+  })
+
+  it('SUBMIT_ANSWER normalises whitespace in the user answer', () => {
+    let state = sessionReducer(initialSessionState, { type: 'START_SESSION', cards })
+    state = sessionReducer(state, { type: 'SUBMIT_ANSWER', userAnswer: '  thank   you  ' })
+    expect(state.currentIndex).toBe(0) // still on first card — need to advance first
+    // second card is "merci → thank you"
+    state = sessionReducer(state, { type: 'ADVANCE' })
+    state = sessionReducer(state, { type: 'SUBMIT_ANSWER', userAnswer: '  thank   you  ' })
+    expect(state.results[1].result).toBe('correct')
+  })
+
+  it('ADVANCE clears lastUserAnswer', () => {
+    let state = sessionReducer(initialSessionState, { type: 'START_SESSION', cards })
+    state = sessionReducer(state, { type: 'SUBMIT_ANSWER', userAnswer: 'hello' })
+    expect(state.lastUserAnswer).toBe('hello')
+    state = sessionReducer(state, { type: 'ADVANCE' })
+    expect(state.lastUserAnswer).toBe('')
   })
 
   it('SUBMIT_ANSWER marks incorrect answer', () => {

@@ -104,4 +104,19 @@ describe('mergeSessionResults', () => {
     const stats = loadCardStats()
     expect(stats).toHaveLength(2)
   })
+
+  it('is a no-op when called with an empty array', () => {
+    mergeSessionResults([])
+    expect(loadCardStats()).toEqual([])
+  })
+
+  it('updates lastSeen on a second merge', () => {
+    mergeSessionResults([makeResult('bonjour', 'hello', 'correct')])
+    const first = loadCardStats()[0].lastSeen
+
+    mergeSessionResults([makeResult('bonjour', 'hello', 'correct')])
+    const second = loadCardStats()[0].lastSeen
+
+    expect(second).toBeGreaterThanOrEqual(first)
+  })
 })
