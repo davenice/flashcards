@@ -7,12 +7,14 @@ import { SetupPage } from './pages/SetupPage'
 import { SessionPage } from './pages/SessionPage'
 import { SummaryPage } from './pages/SummaryPage'
 import { StatsPage } from './pages/StatsPage'
+import { UpdatePrompt } from './components/UpdatePrompt'
 
 export default function App() {
   const [session, dispatch] = useReducer(sessionReducer, initialSessionState)
 
   return (
     <DeckProvider>
+      <UpdatePrompt />
       <HashRouter>
         <Routes>
           <Route path="/" element={<HomePage />} />
