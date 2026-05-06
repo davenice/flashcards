@@ -27,25 +27,23 @@ Building a client-side-only flashcard webapp for foreign language learning (Fren
 ## Unit 1.1: Basics
 
 ### Section 1.1.1: Greetings
-
-French | English
---- | ---
-bonjour | hello
-merci | thank you
+| French | English |
+|--------|---------|
+| bonjour | hello |
+| merci | thank you |
 
 ### Section 1.1.2: Farewells
-
-French | English
---- | ---
-au revoir | goodbye
+| French | English |
+|--------|---------|
+| au revoir | goodbye |
 ```
 
 Rules:
 - `#` = Theme, `##` = Unit, `###` = Section (standard Markdown headings — renders readably in any viewer)
-- Each section begins with a header row (`French | English`) and a separator row (`--- | ---`) so the table renders correctly in Markdown viewers
-- `word | translation` — card line; whitespace around `|` is stripped
+- Each section uses a GitHub-style pipe table: header row (`| French | English |`) immediately follows the `###` heading, then a separator row (`|--------|---------|`), then card rows
+- Both `| word | translation |` (with surrounding pipes) and `word | translation` (without) are accepted; whitespace around `|` is stripped
 - Blank lines and `//` comment lines are ignored
-- Parser skips: the first `|`-line after a `###` heading (header row) and any line where both sides of `|` are only `-` characters (separator row)
+- Parser skips: the first `|`-line after a `###` heading (header row) and any line where every column contains only `-` characters (separator row)
 
 ---
 
@@ -178,7 +176,7 @@ Returns `{ ok: true, deck: Deck } | { ok: false, error: string }` — discrimina
 
 ```typescript
 // vite.config.ts
-base: '/flashcards/'   // ← must match GitHub repo name
+base: '/'
 ```
 
 ---
@@ -233,7 +231,7 @@ GitHub repo Settings → Pages → Source: "GitHub Actions"
 ## Verification Checklist
 
 - `npm run build` exits 0, no TypeScript errors
-- `npm run preview` — app serves from `localhost:4173/flashcards/` (matching base path)
+- `npm run preview` — app serves from `localhost:4173/` (matching base path)
 - Hash routing: refreshing `/#/setup` does not 404
 - Parser tests pass: `npx vitest run`
 - Full session: upload a `.md` file → pick section → run session → reach summary
