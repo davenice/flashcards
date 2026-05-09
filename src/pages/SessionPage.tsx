@@ -1,6 +1,6 @@
-import { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import type { SessionState } from '../types'
+import { useEffect, useRef } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
+import type { SessionState, SessionCard } from '../types'
 import type { SessionAction } from '../state/sessionReducer'
 import { FlashCard } from '../components/FlashCard'
 import { AnswerInput } from '../components/AnswerInput'
@@ -14,17 +14,23 @@ interface Props {
 
 export function SessionPage({ session, dispatch }: Props) {
   const navigate = useNavigate()
+  const location = useLocation()
+  const retestCards = (location.state as { retestCards?: SessionCard[] } | null)?.retestCards ?? []
 
   useEffect(() => {
-    if (session.cards.length === 0) {
+    if (retestCards.length > 0) {
+      dispatch({ type: 'START_SESSION', cards: retestCards })
+    } else if (session.cards.length === 0) {
       navigate('/setup')
     }
-  }, [session.cards.length, navigate])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
+  // Guard: on retest mount, phase is already 'complete' — don't navigate until this session reaches 'answering' first.
+  const hasAnsweredRef = useRef(session.phase === 'answering')
   useEffect(() => {
-    if (session.phase === 'complete') {
-      navigate('/summary')
-    }
+    if (session.phase === 'answering') hasAnsweredRef.current = true
+    if (session.phase === 'complete' && hasAnsweredRef.current) navigate('/summary')
   }, [session.phase, navigate])
 
   if (session.cards.length === 0 || session.phase === 'complete') return null

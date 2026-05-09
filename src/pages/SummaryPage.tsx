@@ -42,8 +42,7 @@ export function SummaryPage({ session, dispatch }: Props) {
 
   function handleRetest() {
     const wrongCards = wrong.map(r => r.sessionCard)
-    dispatch({ type: 'START_SESSION', cards: wrongCards })
-    navigate('/session')
+    navigate('/session', { state: { retestCards: wrongCards } })
   }
 
   function handleStartOver() {
