@@ -7,7 +7,7 @@ import { execSync } from 'child_process'
 const commitHash = (() => {
   try { return execSync('git rev-parse --short HEAD').toString().trim() } catch { return 'unknown' }
 })()
-const buildDate = new Date().toISOString().slice(0, 10)
+const buildDate = new Date().toISOString().slice(0, 16).replace('T', ' ')
 
 export default defineConfig({
   define: {
