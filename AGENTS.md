@@ -2,6 +2,11 @@
 
 French ↔ English flashcard PWA. No backend — everything runs in the browser with `localStorage` persistence.
 
+## Documentation
+
+Bugs are tracked in BUGS.md
+Features are in README.md
+
 ## Stack
 
 - **React 19 + TypeScript + Vite** — standard CRA-style setup
