@@ -154,7 +154,7 @@ END_EARLY        → phase='complete'
 RESET            → initial empty state
 ```
 
-Correctness: `normalise(userAnswer) === normalise(card.answer)` — trim + lowercase + collapse spaces.
+Correctness: `checkAnswer(userAnswer, card.answer)` — see `src/utils/checkAnswer.ts`. Handles gender marker stripping, optional feminine suffixes `(e)`/`(es)`, article interchangeability (`le`/`un`/`l'`), optional parenthetical words, and slash alternation. Returns `exact | accepted | incorrect`; `accepted` carries the canonical form shown as a hint.
 
 ---
 
@@ -167,6 +167,4 @@ GitHub Actions on push to `main`: checkout → `npm ci` → `npm run build` → 
 ## Future Ideas
 
 - **Results sync** — export/import results history (JSON file download) to share across devices
-- **Fuzzy answer matching** — `normalise.ts` is the extension point: accept `word1 / word2` alternatives, strip leading articles (`le`, `la`, `un`…), ignore punctuation
-- **Accent buttons** — buttons to insert accented characters into the answer input
 - **Celebratory feedback** — emoji or illustration on summary based on score

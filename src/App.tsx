@@ -15,6 +15,9 @@ export default function App() {
   return (
     <DeckProvider>
       <UpdatePrompt />
+      <div className="fixed bottom-2 right-3 text-xs text-slate-300 select-none pointer-events-none">
+        {__BUILD_DATE__} · {__COMMIT_HASH__}
+      </div>
       <HashRouter>
         <Routes>
           <Route path="/" element={<HomePage />} />
