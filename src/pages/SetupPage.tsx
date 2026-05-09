@@ -15,7 +15,7 @@ export function SetupPage({ dispatch }: Props) {
   const { deck } = useDeck()
   const navigate = useNavigate()
   const [selected, setSelected] = useState<Set<string>>(new Set())
-  const [direction, setDirection] = useState<Direction>('fr-to-en')
+  const [direction, setDirection] = useState<Direction>('en-to-fr')
   const [questionCount, setQuestionCount] = useState<number>(0)
   const [isManual, setIsManual] = useState(false)
 

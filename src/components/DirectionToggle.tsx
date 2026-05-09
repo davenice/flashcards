@@ -8,7 +8,7 @@ interface Props {
 export function DirectionToggle({ value, onChange }: Props) {
   return (
     <div className="flex rounded-lg border border-slate-300 overflow-hidden" role="group" aria-label="Test direction">
-      {(['fr-to-en', 'en-to-fr'] as Direction[]).map(dir => (
+      {(['en-to-fr', 'fr-to-en'] as Direction[]).map(dir => (
         <button
           key={dir}
           type="button"
