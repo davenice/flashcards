@@ -63,6 +63,7 @@ export function SessionPage({ session, dispatch }: Props) {
           <FeedbackPanel
             result={lastResult.result}
             correctAnswer={current.answer}
+            canonicalAnswer={lastResult.canonicalAnswer}
             userAnswer={session.lastUserAnswer}
             onOverride={() => {
               dispatch({ type: 'OVERRIDE_CORRECT' })

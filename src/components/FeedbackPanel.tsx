@@ -3,13 +3,14 @@ import type { AnswerResult } from '../types'
 interface Props {
   result: AnswerResult
   correctAnswer: string
+  canonicalAnswer?: string
   userAnswer: string
   onOverride: () => void
   onNext: () => void
   isLast: boolean
 }
 
-export function FeedbackPanel({ result, correctAnswer, userAnswer, onOverride, onNext, isLast }: Props) {
+export function FeedbackPanel({ result, correctAnswer, canonicalAnswer, userAnswer, onOverride, onNext, isLast }: Props) {
   const isCorrect = result === 'correct' || result === 'overridden'
 
   return (
@@ -18,6 +19,9 @@ export function FeedbackPanel({ result, correctAnswer, userAnswer, onOverride, o
         <p className={`text-lg font-bold mb-1 ${isCorrect ? 'text-green-700' : 'text-red-700'}`}>
           {isCorrect ? '✓ Correct' : '✗ Not quite'}
         </p>
+        {isCorrect && canonicalAnswer && (
+          <p className="text-sm text-green-700 mt-1">Expected: <span className="font-semibold">{canonicalAnswer}</span></p>
+        )}
         {!isCorrect && (
           <>
             <p className="text-sm text-slate-500">You wrote: <span className="font-medium text-slate-700">{userAnswer}</span></p>

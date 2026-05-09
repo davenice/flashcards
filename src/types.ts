@@ -54,6 +54,7 @@ export interface SessionCardResult {
   sessionCard: SessionCard
   userAnswer: string
   result: AnswerResult
+  canonicalAnswer?: string  // set when answer was accepted but not an exact match
 }
 
 export type SessionPhase = 'answering' | 'revealing' | 'complete'

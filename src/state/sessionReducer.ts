@@ -1,5 +1,5 @@
 import type { SessionCard, SessionCardResult, SessionState } from '../types'
-import { normalise } from '../utils/normalise'
+import { checkAnswer } from '../utils/checkAnswer'
 
 export type SessionAction =
   | { type: 'START_SESSION'; cards: SessionCard[] }
@@ -30,11 +30,12 @@ export function sessionReducer(state: SessionState, action: SessionAction): Sess
 
     case 'SUBMIT_ANSWER': {
       const current = state.cards[state.currentIndex]
-      const isCorrect = normalise(action.userAnswer) === normalise(current.answer)
+      const match = checkAnswer(action.userAnswer, current.answer)
       const result: SessionCardResult = {
         sessionCard: current,
         userAnswer: action.userAnswer,
-        result: isCorrect ? 'correct' : 'incorrect',
+        result: match.outcome !== 'incorrect' ? 'correct' : 'incorrect',
+        ...(match.outcome === 'accepted' && { canonicalAnswer: match.canonical }),
       }
       return {
         ...state,
