@@ -30,6 +30,7 @@ export interface SavedDeck {
   raw: string       // original markdown — re-parsed on select
   savedAt: number   // Date.now()
   cardCount: number
+  isSample?: boolean
 }
 
 export interface CardStats {

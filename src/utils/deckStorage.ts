@@ -1,6 +1,15 @@
 import type { SavedDeck } from '../types'
 
 const STORAGE_KEY = 'flashcards:decks'
+const SEEDED_KEY = 'flashcards:seeded'
+
+export function hasBeenSeeded(): boolean {
+  return localStorage.getItem(SEEDED_KEY) === 'true'
+}
+
+export function markSeeded(): void {
+  localStorage.setItem(SEEDED_KEY, 'true')
+}
 
 export function hashContent(raw: string): string {
   let hash = 5381

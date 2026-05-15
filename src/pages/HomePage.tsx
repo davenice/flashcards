@@ -49,7 +49,10 @@ export function HomePage() {
   }
 
   function handleRemove(saved: SavedDeck) {
-    if (window.confirm(`Remove "${saved.label}"? You'll need to upload the file again to use it.`)) {
+    const message = saved.isSample
+      ? `Remove the sample deck? It won't come back automatically.`
+      : `Remove "${saved.label}"? You'll need to upload the file again to use it.`
+    if (window.confirm(message)) {
       removeDeck(saved.id)
     }
   }
@@ -72,7 +75,14 @@ export function HomePage() {
                   className="bg-white rounded-xl border border-slate-200 px-4 py-3 flex items-center gap-3"
                 >
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-slate-800 truncate">{saved.label}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium text-slate-800 truncate">{saved.label}</p>
+                      {saved.isSample && (
+                        <span className="shrink-0 text-xs font-medium text-amber-600 bg-amber-50 border border-amber-200 rounded px-1.5 py-0.5">
+                          Sample
+                        </span>
+                      )}
+                    </div>
                     <p className="text-xs text-slate-400">{saved.cardCount} card{saved.cardCount !== 1 ? 's' : ''}</p>
                   </div>
                   <button
