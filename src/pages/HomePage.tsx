@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useDeck } from '../state/DeckContext'
 import { hasAnyStats } from '../utils/resultStorage'
@@ -14,6 +14,25 @@ const FORMAT_EXAMPLE = `# Theme name
 | bonjour | hello |
 | merci | thank you |
 | au revoir | goodbye |`
+
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false)
+  const copy = useCallback(() => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
+  }, [text])
+  return (
+    <button
+      type="button"
+      onClick={copy}
+      className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
+    >
+      {copied ? 'Copied!' : 'Copy to clipboard'}
+    </button>
+  )
+}
 
 export function HomePage() {
   const [error, setError] = useState<string | null>(null)
@@ -159,7 +178,10 @@ export function HomePage() {
 
         {showFormat && (
           <div className="mt-3 rounded-xl border border-slate-200 bg-white overflow-hidden">
-            <pre className="p-4 text-xs text-slate-600 font-mono leading-relaxed overflow-x-auto whitespace-pre">{FORMAT_EXAMPLE}</pre>
+            <div className="flex justify-end px-3 pt-2">
+              <CopyButton text={FORMAT_EXAMPLE} />
+            </div>
+            <pre className="px-4 pb-4 pt-1 text-xs text-slate-600 font-mono leading-relaxed overflow-x-auto whitespace-pre">{FORMAT_EXAMPLE}</pre>
           </div>
         )}
       </div>

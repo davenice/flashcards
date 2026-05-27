@@ -186,10 +186,63 @@ deux | two
     expect(result.deck.allCards).toHaveLength(2)
   })
 
-  it('returns error when card appears before section heading', () => {
+  it('parses two-level hierarchy (theme + section, no unit)', () => {
+    const text = `
+# Film Vocabulary
+### Character Adjectives
+| French | English |
+| ---- | ---- |
+| infidèle | unfaithful |
+| égoïste | selfish |
+
+### Plot Developments
+| French | English |
+| ---- | ---- |
+| mentir | to lie |
+`
+    const result = parseMarkdown(text)
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    expect(result.deck.themes).toHaveLength(1)
+    expect(result.deck.themes[0].units).toHaveLength(1)
+    expect(result.deck.themes[0].units[0].name).toBe('')
+    expect(result.deck.themes[0].units[0].sections).toHaveLength(2)
+    expect(result.deck.allCards).toHaveLength(3)
+    expect(result.deck.allCards[0].sectionPath).toEqual(['Film Vocabulary', '', 'Character Adjectives'])
+  })
+
+  it('parses cards directly under a unit heading (no section)', () => {
     const text = `
 # T
 ## U
+French | English
+--- | ---
+bonjour | hello
+merci | thank you
+`
+    const result = parseMarkdown(text)
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    expect(result.deck.allCards).toHaveLength(2)
+    expect(result.deck.allCards[0].sectionPath).toEqual(['T', 'U', ''])
+  })
+
+  it('parses cards directly under a theme heading (no unit, no section)', () => {
+    const text = `
+# T
+French | English
+--- | ---
+bonjour | hello
+`
+    const result = parseMarkdown(text)
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    expect(result.deck.allCards).toHaveLength(1)
+    expect(result.deck.allCards[0].sectionPath).toEqual(['T', '', ''])
+  })
+
+  it('returns error when card appears before any theme heading', () => {
+    const text = `
 French | English
 --- | ---
 bonjour | hello
@@ -197,7 +250,7 @@ bonjour | hello
     const result = parseMarkdown(text)
     expect(result.ok).toBe(false)
     if (result.ok) return
-    expect(result.error).toMatch(/before any section heading/)
+    expect(result.error).toMatch(/before any theme heading/)
   })
 
   it('returns error for empty card value', () => {

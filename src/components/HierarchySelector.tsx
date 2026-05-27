@@ -89,26 +89,30 @@ export function HierarchySelector({ deck, selected, onChange }: Props) {
             {theme.units.map(unit => {
               const unitKeys = unit.sections.map(s => sectionKey([theme.name, unit.name, s.name]))
               const unitAllOn = unitKeys.every(k => selected.has(k))
+              const hasUnitName = unit.name !== ''
 
               return (
-                <div key={unit.name} className="ml-6 mt-1 space-y-1">
-                  <label className="flex items-center gap-2 cursor-pointer text-slate-700">
-                    <input
-                      type="checkbox"
-                      checked={unitAllOn}
-                      onChange={() =>
-                        toggleUnit(theme.name, unit.name, unit.sections.map(s => s.name))
-                      }
-                      className="w-4 h-4 accent-indigo-600"
-                    />
-                    {unit.name}
-                  </label>
+                <div key={unit.name || '__sections__'} className="ml-6 mt-1 space-y-1">
+                  {hasUnitName && (
+                    <label className="flex items-center gap-2 cursor-pointer text-slate-700">
+                      <input
+                        type="checkbox"
+                        checked={unitAllOn}
+                        onChange={() =>
+                          toggleUnit(theme.name, unit.name, unit.sections.map(s => s.name))
+                        }
+                        className="w-4 h-4 accent-indigo-600"
+                      />
+                      {unit.name}
+                    </label>
+                  )}
 
                   {unit.sections.map(section => {
+                    if (!section.name) return null
                     const key = sectionKey([theme.name, unit.name, section.name])
                     const cardCount = section.cards.length
                     return (
-                      <label key={key} className="flex items-center gap-2 ml-6 cursor-pointer text-slate-600 text-sm">
+                      <label key={key} className={`flex items-center gap-2 ${hasUnitName ? 'ml-6' : ''} cursor-pointer text-slate-600 text-sm`}>
                         <input
                           type="checkbox"
                           checked={selected.has(key)}

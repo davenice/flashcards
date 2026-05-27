@@ -58,8 +58,14 @@ export function parseMarkdown(text: string): ParseResult {
     // Section
     const sectionMatch = line.match(/^###\s+(.+)/)
     if (sectionMatch) {
+      if (!currentTheme) {
+        return { ok: false, error: `Line ${lineNum}: section heading found before any theme heading` }
+      }
       if (!currentUnit) {
-        return { ok: false, error: `Line ${lineNum}: section heading found before any unit heading` }
+        // no ## heading — auto-create a synthetic unit with an empty name
+        const existing = currentTheme.units.find(u => u.name === '')
+        currentUnit = existing ?? { name: '', sections: [] }
+        if (!existing) currentTheme.units.push(currentUnit)
       }
       currentSection = { name: sectionMatch[1].trim(), cards: [] }
       currentUnit.sections.push(currentSection)
@@ -89,7 +95,18 @@ export function parseMarkdown(text: string): ParseResult {
       }
 
       if (!currentSection) {
-        return { ok: false, error: `Line ${lineNum}: card found before any section heading` }
+        if (!currentTheme) {
+          return { ok: false, error: `Line ${lineNum}: card found before any theme heading` }
+        }
+        if (!currentUnit) {
+          const existing = currentTheme.units.find(u => u.name === '')
+          currentUnit = existing ?? { name: '', sections: [] }
+          if (!existing) currentTheme.units.push(currentUnit)
+        }
+        const existingSection = currentUnit.sections.find(s => s.name === '')
+        currentSection = existingSection ?? { name: '', cards: [] }
+        if (!existingSection) currentUnit.sections.push(currentSection)
+        expectingHeader = true  // treat this first pipe line as the table header row
       }
       if (!left || !right) {
         return { ok: false, error: `Line ${lineNum}: card has an empty French or English value` }
