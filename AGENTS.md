@@ -11,7 +11,7 @@ Features are in README.md
 
 - **React 19 + TypeScript + Vite** — standard CRA-style setup
 - **Tailwind CSS v4** — utility classes only, no custom CSS beyond `index.css`
-- **React Router v7 `HashRouter`** — hash-based routing for GitHub Pages compatibility
+- **React Router v7 `HashRouter`** — hash-based routing (deployed to Vercel)
 - **`useReducer` + React Context** — all session state lives in `sessionReducer.ts`; deck/result data in `DeckContext.tsx`
 - **`vite-plugin-pwa`** (Workbox, `generateSW`) — precaches all assets for offline use
 
@@ -73,3 +73,17 @@ END_EARLY → phase='complete'
 - `autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck={false}` on all answer inputs
 - Tests colocated with source (`*.test.ts`), run with Vitest
 - `HashRouter` means routes are `/#/setup`, `/#/session` etc. — no server config needed
+
+## Icons
+
+Source of truth is `public/icon.svg` (512×512, pure SVG paths — no `<text>` nodes, no transforms).
+`public/favicon.svg` is a simplified 32×32 version for the browser tab.
+
+After editing `icon.svg`, regenerate the PWA PNGs with ImageMagick:
+
+```sh
+magick -background none public/icon.svg -resize 512x512 public/icon-512.png
+magick -background none public/icon.svg -resize 192x192 public/icon-192.png
+```
+
+Avoid `transform="rotate(...)"` in the SVG — ImageMagick's SVG renderer doesn't handle it reliably. Pre-compute rotated coordinates instead.

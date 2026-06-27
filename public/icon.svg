@@ -1,6 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <rect width="512" height="512" rx="96" fill="#863bff"/>
-  <g transform="translate(76, 84) scale(7.5)">
-    <path fill="white" d="M25.946 44.938c-.664.845-2.021.375-2.021-.698V33.937a2.26 2.26 0 0 0-2.262-2.262H10.287c-.92 0-1.456-1.04-.92-1.788l7.48-10.471c1.07-1.497 0-3.578-1.842-3.578H1.237c-.92 0-1.456-1.04-.92-1.788L10.013.474c.214-.297.556-.474.92-.474h28.894c.92 0 1.456 1.04.92 1.788l-7.48 10.471c-1.07 1.498 0 3.579 1.842 3.579h11.377c.943 0 1.473 1.088.89 1.83L25.947 44.94z"/>
-  </g>
+  <!--
+    Back card: rect at (116,118 280×200 rx=18) rotated -10° around (256,256).
+    Pre-computed path to avoid ImageMagick transform bugs.
+    Fill is white@0.45 composited onto #863bff → #bc93ff.
+  -->
+  <path d="M 112,141 L 352,99 A 18,18,0,0,1,373,114
+           L 402,275 A 18,18,0,0,1,387,296
+           L 147,338 A 18,18,0,0,1,126,323
+           L 97,162  A 18,18,0,0,1,112,141 Z"
+        fill="#bc93ff"/>
+  <!-- Front card -->
+  <rect x="96" y="163" width="320" height="213" rx="18" fill="white"/>
+  <!-- Content lines -->
+  <rect x="148" y="222" width="216" height="16" rx="8" fill="#c4b5fd"/>
+  <rect x="158" y="250" width="196" height="16" rx="8" fill="#c4b5fd"/>
+  <rect x="148" y="278" width="216" height="16" rx="8" fill="#c4b5fd"/>
+  <rect x="178" y="306" width="156" height="16" rx="8" fill="#c4b5fd"/>
 </svg>
