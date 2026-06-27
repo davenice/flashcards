@@ -5,7 +5,7 @@ import { VitePWA } from 'vite-plugin-pwa'
 import { execSync } from 'child_process'
 
 const commitHash = (() => {
-  try { return execSync('git rev-parse --short HEAD').toString().trim() } catch { return 'unknown' }
+  try { return execSync('git rev-parse --short HEAD').toString().trim() } catch { return (process.env.VERCEL_GIT_COMMIT_SHA ?? 'unknown').slice(0, 7) }
 })()
 const buildDate = new Date().toISOString().slice(0, 16).replace('T', ' ')
 
