@@ -5,10 +5,10 @@ import { VitePWA } from 'vite-plugin-pwa'
 import { execSync } from 'child_process'
 
 const commitHash = (() => {
-  try { return execSync('git rev-parse --short HEAD').toString().trim() } catch { return (process.env.CF_PAGES_COMMIT_SHA ?? process.env.VERCEL_GIT_COMMIT_SHA ?? 'unknown').slice(0, 7) }
+  try { return execSync('git rev-parse --short HEAD').toString().trim() } catch { return (process.env.CF_PAGES_COMMIT_SHA ?? 'unknown').slice(0, 7) }
 })()
 const branchName = (() => {
-  try { return execSync('git rev-parse --abbrev-ref HEAD').toString().trim() } catch { return process.env.CF_PAGES_BRANCH ?? process.env.VERCEL_GIT_COMMIT_REF ?? 'unknown' }
+  try { const b = execSync('git rev-parse --abbrev-ref HEAD').toString().trim(); return b === 'HEAD' ? (process.env.CF_PAGES_BRANCH ?? 'unknown') : b } catch { return process.env.CF_PAGES_BRANCH ?? 'unknown' }
 })()
 const buildDate = new Date().toISOString().slice(0, 16).replace('T', ' ')
 
