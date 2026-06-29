@@ -7,22 +7,12 @@ import { execSync } from 'child_process'
 const commitHash = (() => {
   try { return execSync('git rev-parse --short HEAD').toString().trim() } catch { return 'unknown' }
 })()
-const branchName = (() => {
-  try {
-    const b = execSync('git rev-parse --abbrev-ref HEAD').toString().trim()
-    if (b !== 'HEAD') return b
-    const decorations = execSync('git log -1 --pretty=format:%D').toString().trim()
-    const match = decorations.match(/origin\/(\S+)/) ?? decorations.match(/-> (\S+)/)
-    return match ? match[1] : 'unknown'
-  } catch { return 'unknown' }
-})()
 const buildDate = new Date().toISOString().slice(0, 16).replace('T', ' ')
 
 export default defineConfig({
   define: {
     __BUILD_DATE__: JSON.stringify(buildDate),
     __COMMIT_HASH__: JSON.stringify(commitHash),
-    __BRANCH_NAME__: JSON.stringify(branchName),
   },
   base: '/',
   plugins: [
