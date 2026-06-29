@@ -4,13 +4,17 @@ import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import { execSync } from 'child_process'
 
-console.log('CF env:', JSON.stringify({ branch: process.env.CF_PAGES_BRANCH, sha: process.env.CF_PAGES_COMMIT_SHA }))
-
 const commitHash = (() => {
-  try { return execSync('git rev-parse --short HEAD').toString().trim() } catch { return (process.env.CF_PAGES_COMMIT_SHA ?? 'unknown').slice(0, 7) }
+  try { return execSync('git rev-parse --short HEAD').toString().trim() } catch { return 'unknown' }
 })()
 const branchName = (() => {
-  try { const b = execSync('git rev-parse --abbrev-ref HEAD').toString().trim(); return b === 'HEAD' ? (process.env.CF_PAGES_BRANCH ?? 'unknown') : b } catch { return process.env.CF_PAGES_BRANCH ?? 'unknown' }
+  try {
+    const b = execSync('git rev-parse --abbrev-ref HEAD').toString().trim()
+    if (b !== 'HEAD') return b
+    const decorations = execSync('git log -1 --pretty=format:%D').toString().trim()
+    const match = decorations.match(/origin\/(\S+)/) ?? decorations.match(/-> (\S+)/)
+    return match ? match[1] : 'unknown'
+  } catch { return 'unknown' }
 })()
 const buildDate = new Date().toISOString().slice(0, 16).replace('T', ' ')
 
