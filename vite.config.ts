@@ -4,6 +4,8 @@ import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import { execSync } from 'child_process'
 
+console.log('CF env:', JSON.stringify({ branch: process.env.CF_PAGES_BRANCH, sha: process.env.CF_PAGES_COMMIT_SHA }))
+
 const commitHash = (() => {
   try { return execSync('git rev-parse --short HEAD').toString().trim() } catch { return (process.env.CF_PAGES_COMMIT_SHA ?? 'unknown').slice(0, 7) }
 })()
